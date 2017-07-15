@@ -8,6 +8,7 @@ import csv
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
+from config_pb2 import Class
 
 # Utility to read email from Gmail Using Python
 
@@ -32,6 +33,7 @@ USERS_LIST = None
 
 # Read the csv with the data
 def readUsersList():
+  class1 = Class()
   with open('users_list.csv') as csvfile:
     reader = csv.DictReader(csvfile)
     users = list(reader)

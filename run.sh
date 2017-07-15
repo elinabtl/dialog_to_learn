@@ -1,2 +1,2 @@
 git pull
-python emailFilter.py
+python server.py
