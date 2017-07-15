@@ -14,9 +14,10 @@ from email.MIMEText import MIMEText
 # TODO:
 # 1. If program crashes - close server connection.
 # 2. If handling an email fails - mark it as unread again.
-# 3. Is it a good idea to store usersList (the data from csv) in a global variable?
-# 4. I passed a lot of params between functions, but now I'm a bit tired to think, maybe can be done better?
-# 5. Case sensitive for names...
+# 3. Profanity filter + if there is a problem - don't send to the receiver - but to the teacher + add support for teacher (txt file)
+# 4. Change all the params passed to a class.
+# 5. Sending to a non-existing alias should return the email.
+# 6. Case sensitive for last and middle names...
 
 FROM_EMAIL  = "emailfilterclass1@gmail.com"
 FROM_PWD  = "8uV8BGWwDibL"
@@ -27,11 +28,11 @@ PHONE_REGEX = '(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4
 EMAIL_REGEX = '(\w+[.|\w])*@(\w+[.])*\w+'
 
 # Global for the csv
-usersList = None
+USERS_LIST = None
 
 # Read the csv with the data
-def readDataCsv():
-  with open('usersList.csv') as csvfile:
+def readUsersList():
+  with open('users_list.csv') as csvfile:
     reader = csv.DictReader(csvfile)
     users = list(reader)
   return users
@@ -39,9 +40,6 @@ def readDataCsv():
 # Go over all the unread emails - and send the messages accordingly
 def readEmailFromGmail():
   try:
-    global usersList
-    usersList = readDataCsv()
-
     mail = imaplib.IMAP4_SSL(IMAP_SERVER)
     mail.login(FROM_EMAIL,FROM_PWD)
     mail.select('inbox')
@@ -62,14 +60,14 @@ def readEmailFromGmail():
       for response_part in data:
         if isinstance(response_part, tuple):
           msg = email.message_from_string(response_part[1])
-          sendSubject, sendContet, emailTo, demoEmail = readEmail(msg)
-          toRealEmail, message = composeEmail(sendSubject, sendContet, emailTo, demoEmail)
+          sendSubject, sendContent, emailTo, demoEmail = readEmail(msg)
+          toRealEmail, message = composeEmail(sendSubject, sendContent, emailTo, demoEmail)
           server.sendmail(FROM_EMAIL, toRealEmail, message)
-
-    server.quit()
 
   except Exception, e:
     print(str(e))
+  finally:
+    server.quit()
 
 def readEmail(msg):
   emailSubject = msg['subject']
@@ -80,10 +78,10 @@ def readEmail(msg):
     if part.get_content_type() == "text/plain":
       emailContent = part.get_payload()
   lastName, demoEmail = findLastName(email.utils.parseaddr(emailFrom)[1])
-  sendSubject, sendContet = parseEmail(emailFrom, emailTo, emailSubject, emailContent, lastName)
-  return sendSubject, sendContet, emailTo, demoEmail
+  sendSubject, sendContent = parseEmail(emailFrom, emailTo, emailSubject, emailContent, lastName)
+  return sendSubject, sendContent, emailTo, demoEmail
 
-def composeEmail(sendSubject, sendContet, emailTo, demoEmail):
+def composeEmail(sendSubject, sendContent, emailTo, demoEmail):
   msg = MIMEMultipart()
   # Find the real destination email in csv:
   toRealEmail = findRealEmail(email.utils.parseaddr(emailTo)[1])
@@ -91,17 +89,17 @@ def composeEmail(sendSubject, sendContet, emailTo, demoEmail):
   msg['To'] = toRealEmail
   msg['Subject'] = sendSubject # couldn't change the from address to contain +name, so added reply to option
   msg.add_header('reply-to', demoEmail)
-  msg.attach(MIMEText(sendContet, 'plain'))
+  msg.attach(MIMEText(sendContent, 'plain'))
   return toRealEmail, msg.as_string()
 
 def findLastName(email):
-  for user in usersList:
+  for user in USERS_LIST:
     if user['realEmail']==email:
       return user['lastName'], user['demoEmail']
   return None
 
 def findRealEmail(demoEmail):
-  for user in usersList:
+  for user in USERS_LIST:
     if user['demoEmail']==demoEmail:
       return user['realEmail']
   return None
@@ -119,3 +117,7 @@ def parseEmail(emailFrom, emailTo, subject, content, lastName):
   print(' Content: ' + contentFinal)
   print('\n')
   return subjectFinal, contentFinal
+
+if __name__ == "__main__":
+  USERS_LIST = readUsersList()
+  readEmailFromGmail()
