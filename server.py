@@ -8,36 +8,55 @@ import csv
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
-from config_pb2 import Class
+import profanityfilter
+# from config_pb2 import Class
 
 # Utility to read email from Gmail Using Python
 
 # TODO:
-# 1. If program crashes - close server connection.
+# 1. If program crashes - close server connection. DONE
 # 2. If handling an email fails - mark it as unread again.
-# 3. Profanity filter + if there is a problem - don't send to the receiver - but to the teacher + add support for teacher (txt file)
-# 4. Change all the params passed to a class.
-# 5. Sending to a non-existing alias should return the email.
-# 6. Case sensitive for last and middle names...
+# 3. Profanity filter + if there is a problem - don't send to the receiver - but to the teacher + add support for teacher (txt file) DONE
+# 4. Change all the params passed to a class. DONE
+# 5. Sending to a non-existing alias should return the email. DONE
+# 6. Case sensitive for last and middle names... DONE
+# 7. Change to protobuf
 
 FROM_EMAIL  = "emailfilterclass1@gmail.com"
 FROM_PWD  = "8uV8BGWwDibL"
 IMAP_SERVER = "imap.gmail.com"
 SMTP_SERVER = "smtp.gmail.com"
 
-PHONE_REGEX = '(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})'
-EMAIL_REGEX = '(\w+[.|\w])*@(\w+[.])*\w+'
+PHONE_EMAIL_NAME_REGEX = r'((\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})|(\w+[.|\w])*@(\w+[.])*\w+|%s)'
 
 # Global for the csv
 USERS_LIST = None
+TEACHER_EMAIL = None
+
+class EmailData:
+  # All relevant data read from an email
+  def __init__(self, sendData, aliasEmail):
+    self.sendData = sendData
+    self.aliasEmail = aliasEmail
+
+class SendData:
+  # All relevant data to send email
+  def __init__(self, sendToEmail, subject, content):
+    self.sendToEmail = sendToEmail
+    self.subject = subject
+    self.content = content
 
 # Read the csv with the data
 def readUsersList():
-  class1 = Class()
+  # class1 = Class()
   with open('users_list.csv') as csvfile:
     reader = csv.DictReader(csvfile)
     users = list(reader)
   return users
+
+def readTeacherEmail():
+  teacherFile = open("teacher_email.txt", "r")
+  return teacherFile.read().strip()
 
 # Go over all the unread emails - and send the messages accordingly
 def readEmailFromGmail():
@@ -62,8 +81,8 @@ def readEmailFromGmail():
       for response_part in data:
         if isinstance(response_part, tuple):
           msg = email.message_from_string(response_part[1])
-          sendSubject, sendContent, emailTo, demoEmail = readEmail(msg)
-          toRealEmail, message = composeEmail(sendSubject, sendContent, emailTo, demoEmail)
+          # emailData = readEmail(msg)
+          toRealEmail, message = composeEmail(readEmail(msg))
           server.sendmail(FROM_EMAIL, toRealEmail, message)
 
   except Exception, e:
@@ -80,19 +99,18 @@ def readEmail(msg):
     if part.get_content_type() == "text/plain":
       emailContent = part.get_payload()
   lastName, demoEmail = findLastName(email.utils.parseaddr(emailFrom)[1])
-  sendSubject, sendContent = parseEmail(emailFrom, emailTo, emailSubject, emailContent, lastName)
-  return sendSubject, sendContent, emailTo, demoEmail
+  sendData = parseEmail(emailFrom, emailTo, emailSubject, emailContent, lastName)
+  return EmailData(sendData, demoEmail)
 
-def composeEmail(sendSubject, sendContent, emailTo, demoEmail):
+def composeEmail(emailData):
   msg = MIMEMultipart()
   # Find the real destination email in csv:
-  toRealEmail = findRealEmail(email.utils.parseaddr(emailTo)[1])
   msg['from'] = FROM_EMAIL
-  msg['To'] = toRealEmail
-  msg['Subject'] = sendSubject # couldn't change the from address to contain +name, so added reply to option
-  msg.add_header('reply-to', demoEmail)
-  msg.attach(MIMEText(sendContent, 'plain'))
-  return toRealEmail, msg.as_string()
+  msg['To'] = emailData.sendData.sendToEmail
+  msg['Subject'] = emailData.sendData.subject # couldn't change the from address to contain +name, so added reply to option
+  msg.add_header('reply-to', emailData.aliasEmail)
+  msg.attach(MIMEText(emailData.sendData.content, 'plain'))
+  return emailData.sendData.sendToEmail, msg.as_string()
 
 def findLastName(email):
   for user in USERS_LIST:
@@ -107,19 +125,26 @@ def findRealEmail(demoEmail):
   return None
 
 def parseEmail(emailFrom, emailTo, subject, content, lastName):
-  contentNoPhone = re.sub(PHONE_REGEX, "*PHONE*", content)
-  contentFinal = re.sub(EMAIL_REGEX, "*EMAIL*", contentNoPhone)
-  contentFinal = contentFinal.replace(lastName, "*LAST_NAME*")
-  subjectNoPhone = re.sub(PHONE_REGEX, "*PHONE*", subject)
-  subjectFinal = re.sub(EMAIL_REGEX, "*EMAIL*", subjectNoPhone)
-  subjectFinal = subjectFinal.replace(lastName, "*LAST_NAME*")
+  regexp = re.compile(PHONE_EMAIL_NAME_REGEX%lastName)
   print(' From : ' + emailFrom)
   print(" To : " + emailTo)
-  print(' Subject : ' + subjectFinal)
-  print(' Content: ' + contentFinal)
-  print('\n')
-  return subjectFinal, contentFinal
+  print(' Subject : ' + subject)
+  print(' Content: ' + content)
+  if regexp.search(content) or profanityfilter.is_profane(content) or regexp.search(subject) or profanityfilter.is_profane(subject):
+    print " Email or phone or last name or profanity in subject or content send to: " + TEACHER_EMAIL + "\n"
+    filteredSubject = profanityfilter.censor(re.sub(PHONE_EMAIL_NAME_REGEX%lastName, r'*CONTENT_PROBLEM*: \1', subject, flags=re.IGNORECASE))
+    filteredContent = profanityfilter.censor(re.sub(PHONE_EMAIL_NAME_REGEX%lastName, r'*CONTENT_PROBLEM*: \1', content, flags=re.IGNORECASE))
+    filteredSubject = "CONTENT_PROBLEM by " + email.utils.parseaddr(emailFrom)[1] + ": " + filteredSubject
+    return SendData(TEACHER_EMAIL, filteredSubject, filteredContent)
+  else:
+    parsedEmail = email.utils.parseaddr(emailTo)[1]
+    realEmail = findRealEmail(parsedEmail)
+    if realEmail == None:
+      realEmail = email.utils.parseaddr(emailFrom)[1]
+      subject = "Sent to wrong address (" + parsedEmail + "): " + subject
+    return SendData(realEmail, subject, content)
 
 if __name__ == "__main__":
   USERS_LIST = readUsersList()
+  TEACHER_EMAIL = readTeacherEmail()
   readEmailFromGmail()
