@@ -83,7 +83,7 @@ def readEmailFromGmail():
       typ, data = mail.fetch(idx, '(RFC822)' )
       for response_part in data:
         if isinstance(response_part, tuple):
-          msg = email.message_from_string(response_part[1])
+          msg = email.message_from_string(response_part[1].decode('utf-8'))
           toRealEmail, message = composeEmail(readEmail(msg))
           server.sendmail(FROM_EMAIL, toRealEmail, message)
 
@@ -140,6 +140,7 @@ def parseEmail(emailFrom, emailTo, subject, content, lastName):
     filteredSubject = "CONTENT_PROBLEM by " + email.utils.parseaddr(emailFrom)[1] + ": " + filteredSubject
     return SendData(CLASS_DATA.teacher_email, filteredSubject, filteredContent)
   else:
+    print(" Good email\n")
     parsedEmail = email.utils.parseaddr(emailTo)[1]
     realEmail = findRealEmail(parsedEmail)
     if realEmail == None:
@@ -147,6 +148,9 @@ def parseEmail(emailFrom, emailTo, subject, content, lastName):
       subject = "Sent to wrong address (" + parsedEmail + "): " + subject
     return SendData(realEmail, subject, content)
 
-if __name__ == "__main__":
+def main():
   readClassData()
   readEmailFromGmail()
+
+if __name__ == "__main__":
+  main()

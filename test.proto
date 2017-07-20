@@ -1,0 +1,12 @@
+syntax = "proto3";
+package test;
+
+message TestEmails {
+  repeated Email emails = 1;
+}
+
+message Email {
+  string to_email = 1;
+  string subject = 2;
+  string content = 3;
+}

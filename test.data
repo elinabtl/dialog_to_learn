@@ -1,0 +1,15 @@
+emails {
+  to_email: "emailfilterclass1+elina@gmail.com"
+  subject: "Good subject"
+  content: "No problem with content"
+}
+emails {
+  to_email: "emailfilterclass1+elina@gmail.com"
+  subject: "Phone problem 0528484690"
+  content: "I have email data in content hsldfla@gmail.com and another email sdfsd123@bgu.co.uk"
+}
+emails {
+  to_email: "emailfilterclass1+elina@gmail.com"
+  subject: "subject with bullshit"
+  content: "Here I write my name emma testing to check."
+}
