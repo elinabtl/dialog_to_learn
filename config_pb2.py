@@ -19,29 +19,22 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='config.proto',
   package='config',
   syntax='proto3',
-  serialized_pb=_b('\n\x0c\x63onfig.proto\x12\x06\x63onfig\"I\n\x05\x43lass\x12\x15\n\rteacher_email\x18\x01 \x01(\t\x12)\n\x0cparticipants\x18\x02 \x03(\x0b\x32\x13.config.Participant\"r\n\x0bParticipant\x12\x12\n\nreal_email\x18\x01 \x01(\t\x12\x13\n\x0b\x61lias_email\x18\x02 \x01(\t\x12\x12\n\nfirst_name\x18\x03 \x01(\t\x12\x13\n\x0bmiddle_name\x18\x04 \x01(\t\x12\x11\n\tlast_name\x18\x05 \x01(\tb\x06proto3')
+  serialized_pb=_b('\n\x0c\x63onfig.proto\x12\x06\x63onfig\")\n\x07\x43lasses\x12\x1e\n\x07\x63lasses\x18\x01 \x03(\x0b\x32\r.config.Class\"q\n\x05\x43lass\x12\x15\n\rteacher_email\x18\x01 \x01(\t\x12\x13\n\x0b\x63lass_email\x18\x02 \x01(\t\x12\x11\n\tclass_pwd\x18\x03 \x01(\t\x12)\n\x0cparticipants\x18\x04 \x03(\x0b\x32\x13.config.Participant\"r\n\x0bParticipant\x12\x12\n\nreal_email\x18\x01 \x01(\t\x12\x13\n\x0b\x61lias_email\x18\x02 \x01(\t\x12\x12\n\nfirst_name\x18\x03 \x01(\t\x12\x13\n\x0bmiddle_name\x18\x04 \x01(\t\x12\x11\n\tlast_name\x18\x05 \x01(\tb\x06proto3')
 )
 
 
 
 
-_CLASS = _descriptor.Descriptor(
-  name='Class',
-  full_name='config.Class',
+_CLASSES = _descriptor.Descriptor(
+  name='Classes',
+  full_name='config.Classes',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='teacher_email', full_name='config.Class.teacher_email', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='participants', full_name='config.Class.participants', index=1,
-      number=2, type=11, cpp_type=10, label=3,
+      name='classes', full_name='config.Classes.classes', index=0,
+      number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -59,7 +52,59 @@ _CLASS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=24,
-  serialized_end=97,
+  serialized_end=65,
+)
+
+
+_CLASS = _descriptor.Descriptor(
+  name='Class',
+  full_name='config.Class',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='teacher_email', full_name='config.Class.teacher_email', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='class_email', full_name='config.Class.class_email', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='class_pwd', full_name='config.Class.class_pwd', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='participants', full_name='config.Class.participants', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=67,
+  serialized_end=180,
 )
 
 
@@ -117,14 +162,23 @@ _PARTICIPANT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=99,
-  serialized_end=213,
+  serialized_start=182,
+  serialized_end=296,
 )
 
+_CLASSES.fields_by_name['classes'].message_type = _CLASS
 _CLASS.fields_by_name['participants'].message_type = _PARTICIPANT
+DESCRIPTOR.message_types_by_name['Classes'] = _CLASSES
 DESCRIPTOR.message_types_by_name['Class'] = _CLASS
 DESCRIPTOR.message_types_by_name['Participant'] = _PARTICIPANT
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+Classes = _reflection.GeneratedProtocolMessageType('Classes', (_message.Message,), dict(
+  DESCRIPTOR = _CLASSES,
+  __module__ = 'config_pb2'
+  # @@protoc_insertion_point(class_scope:config.Classes)
+  ))
+_sym_db.RegisterMessage(Classes)
 
 Class = _reflection.GeneratedProtocolMessageType('Class', (_message.Message,), dict(
   DESCRIPTOR = _CLASS,

@@ -1,31 +1,52 @@
-teacher_email: "emailfilterclass1emma@gmail.com"
-participants {
-  real_email: "ekleinerman@gmail.com"
-  alias_email: "emailfilterclass1+elina@gmail.com"
-  first_name: "Elina"
-  last_name: "Bartal"
+classes {
+  teacher_email: "emailfilterclass1emma@gmail.com"
+  class_email: "emailfilterclass1@gmail.com"
+  class_pwd: "8uV8BGWwDibL"
+  participants {
+    real_email: "ekleinerman@gmail.com"
+    alias_email: "emailfilterclass1+elina@gmail.com"
+    first_name: "Elina"
+    last_name: "Bartal"
+  }
+  participants {
+    real_email: "blueofer@gmail.com"
+    alias_email: "emailfilterclass1+ofer@gmail.com"
+    first_name: "Ofer"
+    last_name: "Bartal"
+  }
+  participants {
+    real_email: "emailfilterclass1emma@gmail.com"
+    alias_email: "emailfilterclass1+emma@gmail.com"
+    first_name: "Emma"
+    last_name: "Testing"
+  }
+  participants {
+    real_email: "keshiatheobald@gmail.com"
+    alias_email: "emailfilterclass1+keshia@gmail.com"
+    first_name: "Keshia"
+    last_name: "Theobald"
+  }
+  participants {
+    real_email: "theobaldvangent@gmail.com"
+    alias_email: "emailfilterclass1+jose@gmail.com"
+    first_name: "Jose"
+    last_name: "Garcia"
+  }
 }
-participants {
-  real_email: "blueofer@gmail.com"
-  alias_email: "emailfilterclass1+ofer@gmail.com"
-  first_name: "Ofer"
-  last_name: "Bartal"
-}
-participants {
-  real_email: "emailfilterclass1emma@gmail.com"
-  alias_email: "emailfilterclass1+emma@gmail.com"
-  first_name: "Emma"
-  last_name: "Testing"
-}
-participants {
-  real_email: "keshiatheobald@gmail.com"
-  alias_email: "emailfilterclass1+keshia@gmail.com"
-  first_name: "Keshia"
-  last_name: "Theobald"
-}
-participants {
-  real_email: "theobaldvangent@gmail.com"
-  alias_email: "emailfilterclass1+jose@gmail.com"
-  first_name: "Jose"
-  last_name: "Garcia"
+classes {
+  teacher_email: "emailfilterclass1emma@gmail.com"
+  class_email: "emailfilterclass2@gmail.com"
+  class_pwd: "6C3A1BQgaw"
+  participants {
+    real_email: "ekleinerman@gmail.com"
+    alias_email: "emailfilterclass2+elina@gmail.com"
+    first_name: "Elina"
+    last_name: "Bartal"
+  }
+  participants {
+    real_email: "emailfilterclass1emma@gmail.com"
+    alias_email: "emailfilterclass2+emma@gmail.com"
+    first_name: "Emma"
+    last_name: "Testing"
+  }
 }

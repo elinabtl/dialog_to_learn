@@ -12,7 +12,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import profanityfilter
-from config_pb2 import Class
+from config_pb2 import Classes
 import google.protobuf.text_format
 
 # Utility to read email from Gmail Using Python
@@ -26,21 +26,22 @@ import google.protobuf.text_format
 # 6. Case sensitive for last and middle names... DONE
 # 7. Change to protobuf DONE
 
-FROM_EMAIL  = "emailfilterclass1@gmail.com"
-FROM_PWD  = "8uV8BGWwDibL"
+# FROM_EMAIL  = "emailfilterclass1@gmail.com"
+# FROM_PWD  = "8uV8BGWwDibL"
 IMAP_SERVER = "imap.gmail.com"
 SMTP_SERVER = "smtp.gmail.com"
 
 PHONE_EMAIL_NAME_REGEX = r'((\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})|(\w+[.|\w])*@(\w+[.])*\w+|%s)'
 
 # Global class data
-CLASS_DATA = Class()
+CLASS_DATA = Classes()
 
 class EmailData:
   # All relevant data read from an email
-  def __init__(self, sendData, aliasEmail):
+  def __init__(self, sendData, aliasEmail, classIndex):
     self.sendData = sendData
     self.aliasEmail = aliasEmail
+    self.classIndex = classIndex
 
 class SendData:
   # All relevant data to send email
@@ -63,36 +64,38 @@ def readClassData():
 
 # Go over all the unread emails - and send the messages accordingly
 def readEmailFromGmail():
-  try:
-    mail = imaplib.IMAP4_SSL(IMAP_SERVER)
-    mail.login(FROM_EMAIL,FROM_PWD)
-    mail.select('inbox')
+  for classIndex, currentClass in enumerate(CLASS_DATA.classes):
+    try:
+      mail = imaplib.IMAP4_SSL(IMAP_SERVER)
+      mail.login(currentClass.class_email,currentClass.class_pwd)
+      mail.select('inbox')
 
-    type, data = mail.search(None, 'ALL', '(UNSEEN)')
-    idList = data[0].split()
+      type, data = mail.search(None, 'ALL', '(UNSEEN)')
+      idList = data[0].split()
 
-    # Print the count of all unread messages
-    print(len(idList))
-    print('\n')
+      # Print the count of all unread messages
+      print("<<<Class: " + currentClass.class_email + " , unread emails: " + str(len(idList)) + ">>>")
 
-    server = smtplib.SMTP(SMTP_SERVER, 587)
-    server.starttls()
-    server.login(FROM_EMAIL, FROM_PWD)
+      server = smtplib.SMTP(SMTP_SERVER, 587)
+      server.starttls()
+      server.login(currentClass.class_email, currentClass.class_pwd)
 
-    for idx in idList:
-      typ, data = mail.fetch(idx, '(RFC822)' )
-      for response_part in data:
-        if isinstance(response_part, tuple):
-          msg = email.message_from_string(response_part[1].decode('utf-8'))
-          toRealEmail, message = composeEmail(readEmail(msg))
-          server.sendmail(FROM_EMAIL, toRealEmail, message)
+      for idx in idList:
+        typ, data = mail.fetch(idx, '(RFC822)' )
+        for response_part in data:
+          if isinstance(response_part, tuple):
+            msg = email.message_from_string(response_part[1].decode('utf-8'))
+            toRealEmail, message = composeEmail(readEmail(msg, classIndex))
+            server.sendmail(currentClass.class_email, toRealEmail, message)
+            print("Sending email to " + toRealEmail + "\n")
 
-  except Exception as e:
-    print(str(e))
-  finally:
-    server.quit()
+    except Exception as e:
+      print(str(e))
 
-def readEmail(msg):
+    finally:
+      server.quit()
+
+def readEmail(msg, classIndex):
   emailSubject = msg['subject']
   emailFrom = msg['from']
   emailTo = msg['to']
@@ -100,33 +103,33 @@ def readEmail(msg):
   for part in msg.walk():
     if part.get_content_type() == "text/plain":
       emailContent = part.get_payload()
-  lastName, demoEmail = findLastName(email.utils.parseaddr(emailFrom)[1])
-  sendData = parseEmail(emailFrom, emailTo, emailSubject, emailContent, lastName)
-  return EmailData(sendData, demoEmail)
+  lastName, demoEmail = findLastName(email.utils.parseaddr(emailFrom)[1], classIndex)
+  sendData = parseEmail(emailFrom, emailTo, emailSubject, emailContent, lastName, classIndex)
+  return EmailData(sendData, demoEmail, classIndex)
 
 def composeEmail(emailData):
   msg = MIMEMultipart()
   # Find the real destination email in csv:
-  msg['from'] = FROM_EMAIL
+  msg['from'] = CLASS_DATA.classes[emailData.classIndex].class_email
   msg['To'] = emailData.sendData.sendToEmail
   msg['Subject'] = emailData.sendData.subject # couldn't change the from address to contain +name, so added reply to option
   msg.add_header('reply-to', emailData.aliasEmail)
   msg.attach(MIMEText(emailData.sendData.content, 'plain'))
   return emailData.sendData.sendToEmail, msg.as_string()
 
-def findLastName(email):
-  for user in CLASS_DATA.participants:
+def findLastName(email, classIndex):
+  for user in CLASS_DATA.classes[classIndex].participants:
     if user.real_email==email:
       return user.last_name, user.alias_email
   return None
 
-def findRealEmail(demoEmail):
-  for user in CLASS_DATA.participants:
+def findRealEmail(demoEmail, classIndex):
+  for user in CLASS_DATA.classes[classIndex].participants:
     if user.alias_email==demoEmail:
       return user.real_email
   return None
 
-def parseEmail(emailFrom, emailTo, subject, content, lastName):
+def parseEmail(emailFrom, emailTo, subject, content, lastName, classIndex):
   # profanity filter from: https://pythonhosted.org/profanityfilter/
   regexp = re.compile(PHONE_EMAIL_NAME_REGEX%lastName)
   print(' From : ' + emailFrom)
@@ -134,18 +137,18 @@ def parseEmail(emailFrom, emailTo, subject, content, lastName):
   print(' Subject : ' + subject)
   print(' Content: ' + content)
   if regexp.search(content) or profanityfilter.is_profane(content) or regexp.search(subject) or profanityfilter.is_profane(subject):
-    print(" Email or phone or last name or profanity in subject or content send to: " + CLASS_DATA.teacher_email + "\n")
+    print(" Email or phone or last name or profanity in subject or content send to: " + CLASS_DATA.classes[classIndex].teacher_email)
     filteredSubject = profanityfilter.censor(re.sub(PHONE_EMAIL_NAME_REGEX%lastName, r'*CONTENT_PROBLEM*: \1', subject, flags=re.IGNORECASE))
     filteredContent = profanityfilter.censor(re.sub(PHONE_EMAIL_NAME_REGEX%lastName, r'*CONTENT_PROBLEM*: \1', content, flags=re.IGNORECASE))
     filteredSubject = "CONTENT_PROBLEM by " + email.utils.parseaddr(emailFrom)[1] + ": " + filteredSubject
-    return SendData(CLASS_DATA.teacher_email, filteredSubject, filteredContent)
+    return SendData(CLASS_DATA.classes[classIndex].teacher_email, filteredSubject, filteredContent)
   else:
-    print(" Good email\n")
     parsedEmail = email.utils.parseaddr(emailTo)[1]
-    realEmail = findRealEmail(parsedEmail)
+    realEmail = findRealEmail(parsedEmail, classIndex)
     if realEmail == None:
       realEmail = email.utils.parseaddr(emailFrom)[1]
       subject = "Sent to wrong address (" + parsedEmail + "): " + subject
+      print(" Email received with incorrect alias, returning to sender.")
     return SendData(realEmail, subject, content)
 
 def main():

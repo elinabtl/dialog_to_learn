@@ -1,10 +1,15 @@
 syntax = "proto3";
 package config;
 
+message Classes {
+  repeated Class classes = 1;
+}
+
 message Class {
   string teacher_email = 1;
-
-  repeated Participant participants = 2;
+  string class_email = 2;
+  string class_pwd = 3;
+  repeated Participant participants = 4;
 }
 
 message Participant {
