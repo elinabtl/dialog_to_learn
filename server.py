@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0,'/usr/local/lib/python3.6/site-packages')
+
 import smtplib
 import time
 import imaplib
@@ -6,10 +9,11 @@ import email.utils
 import re
 import csv
 import smtplib
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEText import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import profanityfilter
-# from config_pb2 import Class
+from config_pb2 import Class
+import google.protobuf.text_format
 
 # Utility to read email from Gmail Using Python
 
@@ -20,7 +24,7 @@ import profanityfilter
 # 4. Change all the params passed to a class. DONE
 # 5. Sending to a non-existing alias should return the email. DONE
 # 6. Case sensitive for last and middle names... DONE
-# 7. Change to protobuf
+# 7. Change to protobuf DONE
 
 FROM_EMAIL  = "emailfilterclass1@gmail.com"
 FROM_PWD  = "8uV8BGWwDibL"
@@ -29,9 +33,8 @@ SMTP_SERVER = "smtp.gmail.com"
 
 PHONE_EMAIL_NAME_REGEX = r'((\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})|(\w+[.|\w])*@(\w+[.])*\w+|%s)'
 
-# Global for the csv
-USERS_LIST = None
-TEACHER_EMAIL = None
+# Global class data
+CLASS_DATA = Class()
 
 class EmailData:
   # All relevant data read from an email
@@ -46,17 +49,17 @@ class SendData:
     self.subject = subject
     self.content = content
 
-# Read the csv with the data
-def readUsersList():
-  # class1 = Class()
-  with open('users_list.csv') as csvfile:
-    reader = csv.DictReader(csvfile)
-    users = list(reader)
-  return users
-
-def readTeacherEmail():
-  teacherFile = open("teacher_email.txt", "r")
-  return teacherFile.read().strip()
+# Read the protobuf with the data
+def readClassData():
+  with open('config.data', 'r') as f:
+    config_data = f.read()
+  google.protobuf.text_format.Merge(config_data, CLASS_DATA)
+  #import pdb; pdb.set_trace()
+  # Code examples:
+  # CLASS_DATA.teacher_email = 'aaa'
+  # participant = CLASS_DATA.participants.add()
+  # participant.real_email = 'bbb'
+  # participant.alias_email = 'ccc'  
 
 # Go over all the unread emails - and send the messages accordingly
 def readEmailFromGmail():
@@ -81,11 +84,10 @@ def readEmailFromGmail():
       for response_part in data:
         if isinstance(response_part, tuple):
           msg = email.message_from_string(response_part[1])
-          # emailData = readEmail(msg)
           toRealEmail, message = composeEmail(readEmail(msg))
           server.sendmail(FROM_EMAIL, toRealEmail, message)
 
-  except Exception, e:
+  except Exception as e:
     print(str(e))
   finally:
     server.quit()
@@ -113,29 +115,30 @@ def composeEmail(emailData):
   return emailData.sendData.sendToEmail, msg.as_string()
 
 def findLastName(email):
-  for user in USERS_LIST:
-    if user['realEmail']==email:
-      return user['lastName'], user['demoEmail']
+  for user in CLASS_DATA.participants:
+    if user.real_email==email:
+      return user.last_name, user.alias_email
   return None
 
 def findRealEmail(demoEmail):
-  for user in USERS_LIST:
-    if user['demoEmail']==demoEmail:
-      return user['realEmail']
+  for user in CLASS_DATA.participants:
+    if user.alias_email==demoEmail:
+      return user.real_email
   return None
 
 def parseEmail(emailFrom, emailTo, subject, content, lastName):
+  # profanity filter from: https://pythonhosted.org/profanityfilter/
   regexp = re.compile(PHONE_EMAIL_NAME_REGEX%lastName)
   print(' From : ' + emailFrom)
   print(" To : " + emailTo)
   print(' Subject : ' + subject)
   print(' Content: ' + content)
   if regexp.search(content) or profanityfilter.is_profane(content) or regexp.search(subject) or profanityfilter.is_profane(subject):
-    print " Email or phone or last name or profanity in subject or content send to: " + TEACHER_EMAIL + "\n"
+    print(" Email or phone or last name or profanity in subject or content send to: " + CLASS_DATA.teacher_email + "\n")
     filteredSubject = profanityfilter.censor(re.sub(PHONE_EMAIL_NAME_REGEX%lastName, r'*CONTENT_PROBLEM*: \1', subject, flags=re.IGNORECASE))
     filteredContent = profanityfilter.censor(re.sub(PHONE_EMAIL_NAME_REGEX%lastName, r'*CONTENT_PROBLEM*: \1', content, flags=re.IGNORECASE))
     filteredSubject = "CONTENT_PROBLEM by " + email.utils.parseaddr(emailFrom)[1] + ": " + filteredSubject
-    return SendData(TEACHER_EMAIL, filteredSubject, filteredContent)
+    return SendData(CLASS_DATA.teacher_email, filteredSubject, filteredContent)
   else:
     parsedEmail = email.utils.parseaddr(emailTo)[1]
     realEmail = findRealEmail(parsedEmail)
@@ -145,6 +148,5 @@ def parseEmail(emailFrom, emailTo, subject, content, lastName):
     return SendData(realEmail, subject, content)
 
 if __name__ == "__main__":
-  USERS_LIST = readUsersList()
-  TEACHER_EMAIL = readTeacherEmail()
+  readClassData()
   readEmailFromGmail()

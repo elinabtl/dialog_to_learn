@@ -21,7 +21,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_pb=_b('\n\x0c\x63onfig.proto\x12\x06\x63onfig\"I\n\x05\x43lass\x12\x15\n\rteacher_email\x18\x01 \x01(\t\x12)\n\x0cparticipants\x18\x02 \x03(\x0b\x32\x13.config.Participant\"r\n\x0bParticipant\x12\x12\n\nreal_email\x18\x01 \x01(\t\x12\x13\n\x0b\x61lias_email\x18\x02 \x01(\t\x12\x12\n\nfirst_name\x18\x03 \x01(\t\x12\x13\n\x0bmiddle_name\x18\x04 \x01(\t\x12\x11\n\tlast_name\x18\x05 \x01(\tb\x06proto3')
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -125,6 +124,7 @@ _PARTICIPANT = _descriptor.Descriptor(
 _CLASS.fields_by_name['participants'].message_type = _PARTICIPANT
 DESCRIPTOR.message_types_by_name['Class'] = _CLASS
 DESCRIPTOR.message_types_by_name['Participant'] = _PARTICIPANT
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Class = _reflection.GeneratedProtocolMessageType('Class', (_message.Message,), dict(
   DESCRIPTOR = _CLASS,
