@@ -26,6 +26,12 @@ classes {
     first_name: "Theobald"
     last_name: "Vangent"
   }
+  participants {
+    real_email: "emailfilterclass1@gmail.com"
+    alias_email: "d2l.class1+test@gmail.com"
+    first_name: "Test"
+    last_name: "Testing"
+  }
 }
 classes {
   teacher_email: "emailfilterclass1@gmail.com"
@@ -54,5 +60,11 @@ classes {
     alias_email: "d2l.class2+theobald@gmail.com"
     first_name: "Theobald"
     last_name: "Vangent"
+  }
+  participants {
+    real_email: "emailfilterclass1@gmail.com"
+    alias_email: "d2l.class2+test@gmail.com"
+    first_name: "Test"
+    last_name: "Testing"
   }
 }

@@ -10,9 +10,8 @@ import time
 from test_pb2 import TestEmails
 import google.protobuf.text_format
 
-FROM_EMAIL  = "emailfilterclass1emma@gmail.com"
-FROM_PWD  = "1spzGC5Omf"
-TO_EMAIL = "emailfilterclass1+elina@gmail.com"
+FROM_EMAIL  = "emailfilterclass1@gmail.com"
+FROM_PWD  = "8uV8BGWwDibL"
 SMTP_SERVER = "smtp.gmail.com"
 
 EMAILS_DATA = TestEmails()
@@ -31,17 +30,17 @@ def sendTestEmail():
 
     print("Sending " + str(len(EMAILS_DATA.emails)) + " emails to test...")
     for email in EMAILS_DATA.emails:
-      server.sendmail(FROM_EMAIL, email.to_email, composeEmail(email.subject, email.content))
+      server.sendmail(FROM_EMAIL, email.to_email, composeEmail(email.subject, email.content, email.to_email))
 
   except Exception as e:
     print(str(e))
   finally:
     server.quit()
 
-def composeEmail(subject, content):
+def composeEmail(subject, content, toEmail):
   msg = MIMEMultipart()
   msg['from'] = FROM_EMAIL
-  msg['To'] = TO_EMAIL
+  msg['To'] = toEmail
   msg['Subject'] = subject
   msg.attach(MIMEText(content, 'plain'))
   return msg.as_string()

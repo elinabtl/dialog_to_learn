@@ -86,9 +86,13 @@ def readEmailFromGmail():
         for response_part in data:
           if isinstance(response_part, tuple):
             msg = email.message_from_string(response_part[1].decode('utf-8'))
-            toRealEmail, message = composeEmail(readEmail(msg, classIndex))
-            server.sendmail(currentClass.class_email, toRealEmail, message)
-            print("Sending email to " + toRealEmail + "\n")
+            emailData = readEmail(msg, classIndex)
+            if emailData != None:
+              toRealEmail, message = composeEmail(emailData)
+              server.sendmail(currentClass.class_email, toRealEmail, message)
+              print("Sending email to " + toRealEmail + "\n")
+            else:
+              print("Email was from unrecognized account: " + msg['from'] + "\n")
 
     except Exception as e:
       print(str(e))
@@ -105,6 +109,8 @@ def readEmail(msg, classIndex):
     if part.get_content_type() == "text/plain":
       emailContent = part.get_payload()
   lastName, demoEmail = findLastName(email.utils.parseaddr(emailFrom)[1], classIndex)
+  if lastName==None and demoEmail==None:
+    return None
   sendData = parseEmail(emailFrom, emailTo, emailSubject, emailContent, lastName, classIndex)
   return EmailData(sendData, demoEmail, classIndex)
 
@@ -122,7 +128,7 @@ def findLastName(email, classIndex):
   for user in CLASS_DATA.classes[classIndex].participants:
     if user.real_email==email:
       return user.last_name, user.alias_email
-  return None
+  return None, None
 
 def findRealEmail(demoEmail, classIndex):
   for user in CLASS_DATA.classes[classIndex].participants:
