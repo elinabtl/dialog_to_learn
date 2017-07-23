@@ -1,52 +1,58 @@
 classes {
-  teacher_email: "emailfilterclass1emma@gmail.com"
-  class_email: "emailfilterclass1@gmail.com"
-  class_pwd: "8uV8BGWwDibL"
+  teacher_email: "emailfilterclass1@gmail.com"
+  class_email: "d2l.class1@gmail.com"
+  class_pwd: "Tg99br3zKH"
   participants {
     real_email: "ekleinerman@gmail.com"
-    alias_email: "emailfilterclass1+elina@gmail.com"
+    alias_email: "d2l.class1+elina@gmail.com"
     first_name: "Elina"
     last_name: "Bartal"
   }
   participants {
     real_email: "blueofer@gmail.com"
-    alias_email: "emailfilterclass1+ofer@gmail.com"
+    alias_email: "d2l.class1+ofer@gmail.com"
     first_name: "Ofer"
     last_name: "Bartal"
   }
   participants {
-    real_email: "emailfilterclass1emma@gmail.com"
-    alias_email: "emailfilterclass1+emma@gmail.com"
-    first_name: "Emma"
-    last_name: "Testing"
-  }
-  participants {
     real_email: "keshiatheobald@gmail.com"
-    alias_email: "emailfilterclass1+keshia@gmail.com"
+    alias_email: "d2l.class1+keshia@gmail.com"
     first_name: "Keshia"
     last_name: "Theobald"
   }
   participants {
     real_email: "theobaldvangent@gmail.com"
-    alias_email: "emailfilterclass1+jose@gmail.com"
-    first_name: "Jose"
-    last_name: "Garcia"
+    alias_email: "d2l.class1+theobald@gmail.com"
+    first_name: "Theobald"
+    last_name: "Vangent"
   }
 }
 classes {
-  teacher_email: "emailfilterclass1emma@gmail.com"
-  class_email: "emailfilterclass2@gmail.com"
-  class_pwd: "6C3A1BQgaw"
+  teacher_email: "emailfilterclass1@gmail.com"
+  class_email: "d2l.class2@gmail.com"
+  class_pwd: "bl9h4r3gKHa"
   participants {
     real_email: "ekleinerman@gmail.com"
-    alias_email: "emailfilterclass2+elina@gmail.com"
+    alias_email: "d2l.class2+elina@gmail.com"
     first_name: "Elina"
     last_name: "Bartal"
   }
   participants {
-    real_email: "emailfilterclass1emma@gmail.com"
-    alias_email: "emailfilterclass2+emma@gmail.com"
-    first_name: "Emma"
-    last_name: "Testing"
+    real_email: "blueofer@gmail.com"
+    alias_email: "d2l.class2+ofer@gmail.com"
+    first_name: "Ofer"
+    last_name: "Bartal"
+  }
+  participants {
+    real_email: "keshiatheobald@gmail.com"
+    alias_email: "d2l.class2+keshia@gmail.com"
+    first_name: "Keshia"
+    last_name: "Theobald"
+  }
+  participants {
+    real_email: "theobaldvangent@gmail.com"
+    alias_email: "d2l.class2+theobald@gmail.com"
+    first_name: "Theobald"
+    last_name: "Vangent"
   }
 }

@@ -75,7 +75,7 @@ def readEmailFromGmail():
       idList = data[0].split()
 
       # Print the count of all unread messages
-      print("<<<Class: " + currentClass.class_email + " , unread emails: " + str(len(idList)) + ">>>")
+      print("<<<Class: " + currentClass.class_email + " , unread emails: " + str(len(idList)) + ">>>\n")
 
       server = smtplib.SMTP(SMTP_SERVER, 587)
       server.starttls()
