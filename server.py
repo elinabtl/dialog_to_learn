@@ -14,6 +14,7 @@ from email.mime.text import MIMEText
 import profanityfilter
 from config_pb2 import Classes
 import google.protobuf.text_format
+from difflib import Differ
 
 # Utility to read email from Gmail Using Python
 
@@ -129,6 +130,12 @@ def findRealEmail(demoEmail, classIndex):
       return user.real_email
   return None
 
+def appendCensoredToText(input_text, censored_text):
+  l1 = input_text.split(' ')
+  l2 = censored_text.split(' ')
+  dif = list(Differ().compare(l1, l2))
+  return " ".join([i[2:] if i[:1] == '-' or i[:1] == '+' else i[2:] for i in dif])
+
 def parseEmail(emailFrom, emailTo, subject, content, lastName, classIndex):
   # profanity filter from: https://pythonhosted.org/profanityfilter/
   regexp = re.compile(PHONE_EMAIL_NAME_REGEX%lastName)
@@ -138,8 +145,12 @@ def parseEmail(emailFrom, emailTo, subject, content, lastName, classIndex):
   print(' Content: ' + content)
   if regexp.search(content) or profanityfilter.is_profane(content) or regexp.search(subject) or profanityfilter.is_profane(subject):
     print(" Email or phone or last name or profanity in subject or content send to: " + CLASS_DATA.classes[classIndex].teacher_email)
-    filteredSubject = profanityfilter.censor(re.sub(PHONE_EMAIL_NAME_REGEX%lastName, r'*CONTENT_PROBLEM*: \1', subject, flags=re.IGNORECASE))
-    filteredContent = profanityfilter.censor(re.sub(PHONE_EMAIL_NAME_REGEX%lastName, r'*CONTENT_PROBLEM*: \1', content, flags=re.IGNORECASE))
+    censoredSubject = profanityfilter.censor(subject)
+    censoredContent = profanityfilter.censor(content)
+    censoredSubject = appendCensoredToText(subject, censoredSubject)
+    censoredContent = appendCensoredToText(content, censoredContent)
+    filteredSubject = re.sub(PHONE_EMAIL_NAME_REGEX%lastName, r'*CONTENT_PROBLEM*: \1', censoredSubject, flags=re.IGNORECASE)
+    filteredContent = re.sub(PHONE_EMAIL_NAME_REGEX%lastName, r'*CONTENT_PROBLEM*: \1', censoredContent, flags=re.IGNORECASE)
     filteredSubject = "CONTENT_PROBLEM by " + email.utils.parseaddr(emailFrom)[1] + ": " + filteredSubject
     return SendData(CLASS_DATA.classes[classIndex].teacher_email, filteredSubject, filteredContent)
   else:
