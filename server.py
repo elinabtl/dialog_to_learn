@@ -19,13 +19,7 @@ from difflib import Differ
 # Utility to read email from Gmail Using Python
 
 # TODO:
-# 1. If program crashes - close server connection. DONE
-# 2. If handling an email fails - mark it as unread again.
-# 3. Profanity filter + if there is a problem - don't send to the receiver - but to the teacher + add support for teacher (txt file) DONE
-# 4. Change all the params passed to a class. DONE
-# 5. Sending to a non-existing alias should return the email. DONE
-# 6. Case sensitive for last and middle names... DONE
-# 7. Change to protobuf DONE
+# 1. If handling an email fails - mark it as unread again.
 
 IMAP_SERVER = "imap.gmail.com"
 SMTP_SERVER = "smtp.gmail.com"
