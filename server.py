@@ -27,8 +27,6 @@ from difflib import Differ
 # 6. Case sensitive for last and middle names... DONE
 # 7. Change to protobuf DONE
 
-# FROM_EMAIL  = "emailfilterclass1@gmail.com"
-# FROM_PWD  = "8uV8BGWwDibL"
 IMAP_SERVER = "imap.gmail.com"
 SMTP_SERVER = "smtp.gmail.com"
 
