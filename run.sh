@@ -1,2 +1,2 @@
 git pull
-python server.py
+python3 server.py
