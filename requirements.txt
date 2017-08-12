@@ -2,3 +2,4 @@
 protobuf==3.3.0  # if it fails: sudo pip install --ignore-installed six
 protobuf3==0.2.1
 six==1.10.0
+profanityfilter==1.1.2
